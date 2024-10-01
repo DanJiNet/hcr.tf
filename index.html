@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alphabet Predictor</title>
+    <title>Handwritten Alphabet Predictor</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="alphabet_model_js/tfjs_model.js"></script>
     <style>
         #canvas {
             border: 1px solid black;
@@ -13,30 +12,55 @@
         .controls {
             margin-top: 10px;
         }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: green;
+        }
     </style>
 </head>
 <body>
     <h1>Handwritten Alphabet Predictor</h1>
+    
+    <!-- Canvas to draw -->
     <canvas id="canvas" width="64" height="64"></canvas>
+    
+    <!-- Upload image -->
+    <div class="controls">
+        <input type="file" id="imageUpload" accept="image/*" onchange="loadImage(event)">
+    </div>
+    
     <div class="controls">
         <button onclick="clearCanvas()">Clear</button>
         <button onclick="predict()">Predict</button>
     </div>
+    
+    <!-- Display prediction -->
     <p>Predicted Alphabet: <span id="prediction">None</span></p>
-
+    <p id="status">Model loading...</p> <!-- Debugging info -->
+    
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let model;
+        let isModelLoaded = false;
+        let isDrawing = false;
 
         // Load the TensorFlow.js model
         async function loadModel() {
-            model = await tf.loadLayersModel('alphabet_model_js/model.json');
+            try {
+                document.getElementById('status').textContent = "Loading model...";
+                model = await tf.loadLayersModel('tfjs_model/model.json');  // Adjust path as needed
+                document.getElementById('status').textContent = "Model loaded successfully!";
+                isModelLoaded = true;
+            } catch (error) {
+                document.getElementById('status').textContent = "Error loading model!";
+                console.error(error);
+            }
         }
         loadModel();
 
         // Drawing on canvas
-        let isDrawing = false;
         canvas.addEventListener('mousedown', () => isDrawing = true);
         canvas.addEventListener('mouseup', () => isDrawing = false);
         canvas.addEventListener('mousemove', draw);
@@ -49,20 +73,47 @@
 
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('prediction').textContent = "None";
         }
 
+        // Preprocess canvas image for prediction
         function getImageData() {
             const imageData = ctx.getImageData(0, 0, 64, 64);
             const data = tf.browser.fromPixels(imageData, 1).expandDims(0).div(255.0);
             return data;
         }
 
+        // Handle image upload
+        function loadImage(event) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, 64, 64);  // Resize to fit canvas
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
         // Predict function
         async function predict() {
-            const imageData = getImageData();
-            const prediction = await model.predict(imageData).data();
-            const alphabet = String.fromCharCode(65 + prediction.indexOf(Math.max(...prediction)));
-            document.getElementById('prediction').textContent = alphabet;
+            if (!isModelLoaded) {
+                alert("Model not loaded yet!");
+                return;
+            }
+            document.getElementById('status').textContent = "Processing...";
+            try {
+                const imageData = getImageData();
+                const prediction = await model.predict(imageData).data();
+                const alphabet = String.fromCharCode(65 + prediction.indexOf(Math.max(...prediction)));
+                document.getElementById('prediction').textContent = alphabet;
+                document.getElementById('status').textContent = "Prediction complete.";
+            } catch (error) {
+                document.getElementById('status').textContent = "Error during prediction!";
+                console.error(error);
+            }
         }
     </script>
 </body>
