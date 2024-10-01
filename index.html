@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Handwritten Alphabet Predictor</title>
+    <title>Alphabet Predictor</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <style>
         #canvas {
@@ -50,12 +50,13 @@
         async function loadModel() {
             try {
                 document.getElementById('status').textContent = "Loading model...";
-                model = await tf.loadLayersModel('tfjs_model/model.json');  // Adjust path as needed
+                // Ensure the path is correct relative to index.html
+                model = await tf.loadLayersModel('tfjs_model/model.json');
                 document.getElementById('status').textContent = "Model loaded successfully!";
                 isModelLoaded = true;
             } catch (error) {
                 document.getElementById('status').textContent = "Error loading model!";
-                console.error(error);
+                console.error("Model loading error:", error);
             }
         }
         loadModel();
