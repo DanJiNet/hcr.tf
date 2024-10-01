@@ -21,24 +21,24 @@
 </head>
 <body>
     <h1>Handwritten Alphabet Predictor</h1>
-    
+
     <!-- Canvas to draw -->
     <canvas id="canvas" width="64" height="64"></canvas>
-    
+
     <!-- Upload image -->
     <div class="controls">
         <input type="file" id="imageUpload" accept="image/*" onchange="loadImage(event)">
     </div>
-    
+
     <div class="controls">
         <button onclick="clearCanvas()">Clear</button>
         <button onclick="predict()">Predict</button>
     </div>
-    
+
     <!-- Display prediction -->
     <p>Predicted Alphabet: <span id="prediction">None</span></p>
     <p id="status">Model loading...</p> <!-- Debugging info -->
-    
+
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -50,13 +50,23 @@
         async function loadModel() {
             try {
                 document.getElementById('status').textContent = "Loading model...";
+                console.log("Attempting to load model from 'tfjs_model/model.json'...");
+                
                 // Ensure the path is correct relative to index.html
                 model = await tf.loadLayersModel('tfjs_model/model.json');
+
                 document.getElementById('status').textContent = "Model loaded successfully!";
+                console.log("Model loaded successfully!");
                 isModelLoaded = true;
             } catch (error) {
                 document.getElementById('status').textContent = "Error loading model!";
                 console.error("Model loading error:", error);
+
+                // Detailed error logging for troubleshooting
+                console.log("Error details:");
+                console.log("Error message:", error.message);
+                console.log("Error stack trace:", error.stack);
+                console.log("Check if 'model.json' and '.bin' files are in the correct path.");
             }
         }
         loadModel();
