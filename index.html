@@ -50,10 +50,10 @@
         async function loadModel() {
             try {
                 document.getElementById('status').textContent = "Loading model...";
-                console.log("Attempting to load model from 'tfjs_model/model.json'...");
+                console.log("Attempting to load model from 'https://github.com/DanJiNet/hcr.tf.keras/blob/main/tfjs_model%2Fmodel.json'...");
                 
                 // Ensure the path is correct relative to index.html
-                model = await tf.loadLayersModel('tfjs_model/model.json');
+                model = await tf.loadLayersModel('https://github.com/DanJiNet/hcr.tf.keras/blob/main/tfjs_model%2Fmodel.json');
 
                 document.getElementById('status').textContent = "Model loaded successfully!";
                 console.log("Model loaded successfully!");
